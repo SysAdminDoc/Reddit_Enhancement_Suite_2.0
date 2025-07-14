@@ -1,0 +1,523 @@
+/*
+  Reddit - Switchable Light/Dark Skin
+  ------------------------------------
+  - Light theme is the default.
+  - To enable Dark Mode, add the class "dark-mode" to the <html> element.
+*/
+
+/* --- Common Base Styles --- */
+* {
+    box-sizing: border-box;
+}
+
+#RESConsoleContainer * {
+    box-sizing: content-box;
+}
+
+/* Hide Unwanted Elements */
+.trending-subreddits,
+.sidebox.create .spacer,
+#hsts_pixel,
+#jumpToContent,
+.side .sidebox.create,
+.side .sidebox .nub,
+div.footer-parent {
+    display: none;
+}
+
+/* --- Header --- */
+#header {
+    background: #3F51B5;
+    height: 80px !important;
+}
+
+ul.tabmenu {
+    font-size: 13px;
+    margin: 0;
+    display: inline-block;
+    max-width: 100%;
+}
+
+ul.tabmenu li {
+    margin: 0;
+    min-width: 60px;
+    display: inline-block;
+    transition: background 0.2s;
+}
+
+ul.tabmenu li.selected {
+    border-bottom: 2px solid #FF5252;
+}
+
+ul.tabmenu li.selected a {
+    background: transparent;
+    border: none;
+    opacity: 1;
+}
+
+ul.tabmenu li a {
+    font-weight: normal;
+    transition: opacity 0.2s;
+    background: transparent;
+    color: white !important;
+    opacity: 0.7;
+    text-transform: uppercase;
+    padding: 0 24px 18px;
+    display: block;
+    height: 100%;
+}
+
+ul.tabmenu li a:hover {
+    opacity: 1;
+}
+
+/* --- Main Content --- */
+body > .content {
+    z-index: 3;
+    position: relative;
+    border-radius: 2px;
+    margin: 0 0 0 35px !important;
+    background: none;
+    overflow: hidden;
+    padding-bottom: 500px;
+}
+
+#siteTable {
+    padding-bottom: 45px;
+}
+
+#siteTable .thing {
+    margin: 0 12px;
+}
+
+#siteTable .thing .entry {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    padding: 12px 20px 18px;
+    overflow: visible;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    border-radius: 1px;
+    transition: all 0.2s;
+    margin-left: 85px;
+}
+
+#siteTable .thing .entry.RES-keyNav-activeElement {
+    z-index: 20;
+    transform: translateY(-2px);
+}
+
+.thing .rank {
+    display: none;
+}
+
+/* Post Midcol (Votes) */
+.thing .midcol {
+    min-width: 40px !important;
+    margin: 0;
+    overflow: visible;
+}
+
+.thing .midcol .score {
+    font-weight: bold;
+    position: relative;
+    top: 5px;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.thing .midcol .arrow {
+    font-size: 1.4em;
+    margin: 0;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.thing .midcol .arrow:hover {
+    opacity: 1;
+}
+
+.thing .midcol .arrow.upmod,
+.thing .midcol .score.likes {
+    color: #B37159;
+}
+
+.thing .midcol .arrow.downmod,
+.thing .midcol .link .score.dislikes {
+    color: #5959B3;
+}
+
+/* Post Thumbnail */
+.thing .thumbnail {
+    height: 70px !important;
+    min-width: 70px;
+    margin: 6px 20px 0;
+    border-radius: 2px;
+    overflow: hidden;
+    text-align: center;
+    position: relative;
+}
+
+.thing .thumbnail.self,
+.thing .thumbnail.default {
+    margin-top: 20px;
+    height: 50px !important;
+}
+
+/* Post Entry (Title, Tagline, etc.) */
+.thing .entry p.title {
+    line-height: 20px;
+    padding: 8px 30px 4px 0;
+    margin: 0;
+    width: 100%;
+}
+
+.thing .entry .tagline {
+    order: 2;
+    line-height: 12px;
+    font-size: 0;
+    align-items: center;
+}
+
+.thing .entry .tagline a {
+    font-size: 13px;
+    font-variant: small-caps;
+}
+
+.thing .entry .tagline time,
+.thing .entry .tagline .author,
+.thing .entry .tagline .RESUserTag {
+    font-size: 12px;
+}
+
+.thing .entry .flat-list.buttons {
+    font-variant: small-caps;
+    height: 22px;
+    line-height: 22px;
+    padding: 0;
+}
+
+/* --- Comment Section --- */
+.commentarea {
+    padding: 16px;
+}
+
+.commentarea .comment {
+    overflow: visible !important;
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.commentarea .comment .child {
+    margin-left: 20px;
+    margin-top: 0;
+    border-left: none;
+}
+
+.commentarea .comment .entry {
+    position: relative;
+    overflow: visible;
+    padding: 14px 18px 12px 18px;
+    margin: 2px;
+    margin-top: 0;
+    margin-left: 40px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    transition: all 0.2s;
+}
+
+.commentarea .comment .entry.RES-keyNav-activeElement {
+    transform: translateY(-3px);
+    border-left-color: #3F51B5 !important;
+}
+
+.commentarea .comment .entry .tagline {
+    line-height: 16px;
+    height: 16px;
+    display: inline-block;
+    font-variant: small-caps !important;
+    font-size: 12px !important;
+}
+
+.md-container,
+.md-container .md {
+    min-width: 100%;
+    background-color: transparent !important;
+    border: none !important;
+    font-size: 13px !important;
+}
+
+/* Rainbow Comment Borders */
+.commentarea > .sitetable > .comment > .entry { border-left-color: #D81B60; }
+.commentarea > .sitetable > .comment > .child > .sitetable > .comment > .entry { border-left-color: #FB8C00; }
+.commentarea > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .entry { border-left-color: #FDD835; }
+.commentarea > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .entry { border-left-color: #43A047; }
+.commentarea > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .entry { border-left-color: #039BE5; }
+.commentarea > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .entry { border-left-color: #3949AB; }
+.commentarea > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .child > .sitetable > .comment > .entry { border-left-color: #8E24AA; }
+
+/* --- Sidebar --- */
+.side {
+    z-index: 1;
+    width: 340px;
+    order: 10;
+    margin: 0 35px 0 6px;
+    position: relative;
+    background: none;
+}
+
+.side .spacer {
+    margin: 0 !important;
+    padding: 0 25px;
+    overflow: hidden;
+}
+
+.side .titlebox h1.redditname {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-size: 24px;
+    border-bottom: none;
+    font-family: roboto, noto, "Trebuchet MS", helvetica, arial, sans-serif;
+    height: 65px;
+    line-height: 65px;
+    background: #3F51B5;
+    padding-left: 24px;
+    margin: 0 0 24px 0;
+    display: block;
+    text-align: left;
+    color: white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.side .titlebox h1.redditname a {
+    text-decoration: none;
+    font-weight: normal;
+    font-size: 24px;
+    color: white;
+}
+
+/*
+================================
+--- Light Theme (Default) ---
+================================
+*/
+
+body {
+    background-color: #F1F1F1;
+    color: #444;
+    font-family: roboto, noto, "Trebuchet MS", helvetica, arial, sans-serif;
+}
+
+a {
+    color: #5777A8;
+}
+
+a:visited {
+    color: #8D5BA4;
+}
+
+a:hover {
+    color: #8aa0c1;
+}
+
+.md {
+    color: #444;
+}
+
+button {
+    background: transparent;
+    border: none;
+    border-radius: 2px;
+    box-shadow: none;
+    color: #2196F3;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+    min-width: 88px;
+    height: 36px;
+    line-height: 36px;
+    padding: 0 8px;
+    text-align: center;
+    margin-bottom: 12px;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: rgba(153, 153, 153, 0.2);
+}
+
+.side .spacer,
+#siteTable .thing .entry,
+.commentarea .comment .entry {
+    background-color: white;
+}
+
+body:not(.comments-page) #siteTable .thing .entry:hover {
+    background: #FCFCFC;
+    transform: translateY(-5px);
+}
+
+.thing .midcol .score {
+    color: #757575;
+}
+
+.thing .entry p.title a.title {
+    color: #444;
+}
+
+.thing .entry p.title a.title:hover {
+    color: #5777A8;
+}
+
+.thing .entry p.title a.title:visited {
+    color: #666;
+}
+
+.thing .entry p.title a.title:visited:hover {
+    color: #8D5BA4;
+}
+
+.thing .entry .tagline a {
+    color: grey;
+}
+
+.commentarea {
+    color: #555;
+}
+
+.commentarea .child .comment {
+    border-left: 1px solid #cecece !important;
+}
+
+.commentarea .comment .entry {
+    border-left-style: solid;
+    border-left-width: 6px;
+}
+
+.commentarea .comment .entry .tagline .author.submitter {
+    background: #85afd5 !important;
+    color: white;
+}
+
+input,
+textarea {
+    background: #FEFEFE;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    border: none;
+    color: #444;
+}
+
+input:focus,
+textarea:focus {
+    background: white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+/*
+================================
+--- Dark Theme Overrides ---
+================================
+*/
+
+.dark-mode body {
+    background-color: #1a1a1b;
+    color: #d7dadc;
+}
+
+.dark-mode a {
+    color: #4f9dff;
+}
+
+.dark-mode a:visited {
+    color: #9c67b6;
+}
+
+.dark-mode a:hover {
+    color: #77b4ff;
+}
+
+.dark-mode .md {
+    color: #d7dadc;
+}
+
+.dark-mode button {
+    color: #4f9dff;
+}
+
+.dark-mode button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .side .spacer,
+.dark-mode #siteTable .thing .entry,
+.dark-mode .commentarea .comment .entry {
+    background-color: #272729;
+    border-color: #343536;
+}
+
+.dark-mode body:not(.comments-page) #siteTable .thing .entry:hover {
+    background: #303032;
+    transform: translateY(-5px);
+}
+
+.dark-mode #siteTable .thing .entry.RES-keyNav-activeElement {
+    background: #303032 !important;
+}
+
+.dark-mode .thing .midcol .score {
+    color: #a8a8a8;
+}
+
+.dark-mode .thing .entry p.title a.title,
+.dark-mode .thing .entry p.title a.title:visited {
+    color: #d7dadc;
+}
+
+.dark-mode .thing .entry p.title a.title:hover {
+    color: #4f9dff;
+}
+
+.dark-mode .thing .entry .tagline a {
+    color: #8e8e8e;
+}
+
+.dark-mode .commentarea {
+    color: #d7dadc;
+}
+
+.dark-mode .commentarea .child .comment {
+    border-left: 1px solid #343536 !important;
+}
+
+.dark-mode .commentarea .comment .entry {
+    border-left-style: solid;
+    border-left-width: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .commentarea .comment .entry.RES-keyNav-activeElement {
+    background: #303032 !important;
+}
+
+.dark-mode .commentarea .comment .entry .tagline .author.submitter {
+    background: #3c5d81 !important;
+    color: #d7dadc;
+}
+
+.dark-mode input,
+.dark-mode textarea {
+    background-color: #272729;
+    border: 1px solid #343536;
+    color: #d7dadc;
+    box-shadow: none;
+}
+
+.dark-mode input:focus,
+.dark-mode textarea:focus {
+    background-color: #333335;
+    border-color: #d7dadc;
+}
