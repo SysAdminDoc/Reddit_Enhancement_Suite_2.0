@@ -1,0 +1,561 @@
+// ==UserScript==
+// @name         RES for Old Reddit
+// @namespace    http://tampermonkey.net/
+// @version      1.2
+// @description  A retractable sidebar and dark theme for Old Reddit.
+// @author       You & Gemini
+// @match        https://old.reddit.com/*
+// @match        https://www.redditmedia.com/mediaembed/*
+// @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @downloadURL  https://update.greasyfork.org/scripts/xxxx/RES-for-Old-Reddit.user.js
+// @updateURL    https://update.greasyfork.org/scripts/xxxx/RES-for-Old-Reddit.meta.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // --- Injected Dark Theme CSS ---
+    // This CSS is converted from the "Reddit Old Redesigned Dark" userstyle by Jorenar
+    GM_addStyle(`
+      /* --- COLOR DEFINITIONS --- */
+      :root {
+        --gray-0: #121212;
+        --gray-1: #232323;
+        --gray-2: #343434;
+        --gray-3: #454545;
+        --gray-a0: #1e1e1e;
+        --blue-0: #4ac;
+        --blue-1: #369;
+        --blue-2: #2c89f5;
+        --red: #d3391a;
+        --dark-red: #440202;
+        --text-normal: hsla(0, 100%, 100%, 0.8);
+        --text-normal-hover: #fff;
+        --text-med: hsl(0, 0%, 60%);
+        --text-dark: hsl(0, 0%, 45%);
+        --text-dark-hover: var(--text-normal);
+        --url: hsla(200, 20%, 60%, 0.8);
+      }
+
+      /* --- General --- */
+      body[class] {
+        background-color: var(--gray-0);
+        color: var(--text-normal);
+      }
+      .md {
+        color: var(--text-normal);
+      }
+      .md-spoiler-text.revealed {
+        background: var(--gray-1);
+      }
+      a, a[class], a[class]:visited {
+        color: var(--url);
+      }
+      a:hover {
+        color: var(--text-normal-hover);
+      }
+      blockquote {
+        color: var(--text-med);
+      }
+      pre, code {
+        background: var(--gray-a0) !important;
+        border: none;
+      }
+      textarea, input {
+        background: var(--gray-0);
+        border: 1px solid var(--gray-1);
+        color: var(--text-normal);
+      }
+      button {
+        background: var(--gray-0);
+        border-radius: 5px;
+        border: 1px solid;
+        color: var(--text-med);
+      }
+      button:hover {
+        background: var(--gray-1);
+      }
+      input[type="text"] {
+        border-radius: 2px;
+        color: var(--text-med) !important;
+        font-size: 14px;
+      }
+
+      /* --- Header --- */
+      #header {
+        background: var(--gray-1);
+        border-bottom: 2px solid var(--gray-0);
+        display: flex;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 1000; /* Ensure header is above sidebar */
+      }
+      #sr-header-area {
+        align-items: center;
+        background: var(--gray-2);
+        border: 0;
+        display: flex;
+        font-size: 12px;
+        padding: 3px 0;
+        width: 100%;
+      }
+      #sr-header-area a, #sr-header-area .dropdown.srdrop .selected {
+        color: var(--text-med) !important;
+        font-size: 13px;
+        text-decoration: none;
+      }
+      #sr-header-area a:hover, #sr-header-area .dropdown.srdrop .selected:hover {
+        color: var(--text-dark-hover) !important;
+      }
+      #sr-header-area .sr-list .flat-list.sr-bar:nth-of-type(2) {
+        text-transform: none;
+      }
+      #sr-header-area .sr-bar .separator {
+        color: var(--red);
+        margin: 0 4px;
+      }
+      .drop-choices {
+        background: var(--gray-0);
+        border: 1px solid var(--gray-2);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), 0 6px 6px rgba(0, 0, 0, 0.9);
+        font-size: 12px;
+        max-height: 50vh;
+        min-height: min-content;
+        overflow: clip auto;
+        padding: 4px 0;
+      }
+      .drop-choices .choice {
+        padding-right: 20px;
+      }
+      .drop-choices .choice:hover {
+        background: var(--gray-2);
+      }
+      #sr-header-area .sr-list .separator:nth-of-type(2),
+      #sr-header-area .sr-list .flat-list.sr-bar:nth-of-type(3),
+      #redesign-beta-optin-btn,
+      #sr-more-link {
+        display: none;
+      }
+      #header-bottom-left {
+        align-items: center;
+        display: flex;
+        height: 56px;
+      }
+      #header-img {
+        background-image: url(https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png) !important;
+        background-position: center !important;
+        background-size: cover;
+        height: 36px !important;
+        margin: 4px 16px;
+        width: 36px !important;
+      }
+      #header-img:hover {
+        opacity: 0.8;
+      }
+      .pagename {
+        font-size: 22px;
+        font-variant: normal;
+        margin: 0 10px;
+        position: initial !important;
+      }
+      .pagename.redditname a {
+        color: var(--text-normal);
+      }
+      .tabmenu {
+        margin: 0;
+      }
+      .tabmenu li a {
+        background: none;
+        color: var(--text-normal);
+        font-size: 18px;
+        font-weight: initial;
+        text-transform: uppercase;
+      }
+      .tabmenu li a:hover {
+        color: var(--text-normal-hover);
+      }
+      .tabmenu li.selected a {
+        border: none;
+        color: var(--red);
+      }
+      #header-bottom-right {
+        align-items: center;
+        background: none;
+        display: flex;
+        font-size: 14px;
+        margin-left: auto;
+        padding: 0 8px;
+        position: initial;
+      }
+      #header-bottom-right a {
+        color: var(--text-normal);
+      }
+      #header-bottom-right a:hover {
+        color: var(--text-normal-hover);
+      }
+      #header-bottom-right .user {
+        display: flex;
+        visibility: hidden;
+      }
+      #header-bottom-right .user > a {
+        order: 1;
+        visibility: visible;
+      }
+
+      /* --- Right sidebar (Themed by style, functionality by script) --- */
+      .side .md {
+        font-size: 13px;
+      }
+      .side .sidebox .spacer {
+        background: var(--gray-a0);
+        padding: 5px 3px;
+      }
+      .side .titlebox h1 a {
+        color: var(--text-normal) !important;
+      }
+      .side .titlebox form.toggle, .side .leavemoderator {
+        background: none;
+        color: var(--text-normal);
+      }
+      .side .sidecontentbox .message-button a.c-btn-primary {
+        background-color: var(--gray-2);
+        border-bottom: none;
+      }
+      .side .sidecontentbox.collapsible a {
+        background: none;
+        color: var(--text-med) !important;
+      }
+      .side .sidecontentbox .collapse-button {
+        background: var(--gray-3);
+        color: var(--text-normal);
+      }
+      .side .linkinfo {
+        background: var(--gray-2);
+        border-color: var(--gray-3);
+      }
+      .side .linkinfo #shortlink-text {
+        color: var(--text-med);
+      }
+      .side #searchexpando {
+        padding: 8px 16px;
+      }
+      .side #searchexpando label {
+        margin: 8px 0 0 0;
+      }
+      .side .morelink {
+        background: var(--gray-2);
+        border: 0;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        font-size: 16px;
+        font-weight: 400;
+        text-transform: uppercase;
+      }
+      .side .morelink a {
+        color: var(--text-med) !important;
+      }
+      .side .morelink:hover a {
+        background: var(--gray-3);
+      }
+      .side .morelink .nub {
+        display: none;
+      }
+      .side .sidebox.create .spacer,
+      .tutorial_post,
+      .happening-now-wrap,
+      .premium-banner-outer {
+        display: none !important;
+      }
+
+      /* --- Link/comment/message --- */
+      .thing.link {
+        background-color: transparent;
+        border: none;
+        display: flex !important;
+        margin: 0;
+        padding: 8px 0;
+      }
+      .thing.link.last-clicked {
+        border: none;
+      }
+      .thing.link .entry {
+        width: 100%;
+      }
+      .thing.link .rank {
+        display: none;
+      }
+      .thing.link .domain a {
+        color: var(--text-dark);
+        font-size: 12px;
+      }
+      .thing.link .score {
+        font-size: 16px;
+        padding: 8px 0;
+      }
+      .thing.link .thumbnail {
+        background-color: var(--gray-2);
+        flex: 0 0 auto;
+        height: 78px;
+        margin-right: 16px;
+        opacity: 0.5;
+        width: 140px;
+      }
+      .thing.link .thumbnail img {
+        height: auto;
+        width: inherit;
+      }
+      .thing.link .title {
+        color: var(--text-normal) !important;
+        font-size: 18px;
+        padding-bottom: 8px;
+      }
+      .thing.link .title:hover {
+        color: var(--text-normal-hover) !important;
+      }
+      .thing.link .title:visited {
+        color: var(--text-dark) !important;
+        opacity: 0.8;
+      }
+      .thing.link[data-rank=""] .top-matter a.title:visited {
+        color: var(--text-normal) !important;
+      }
+      .thing.link .tagline {
+        color: var(--text-dark);
+        font-size: 12px;
+        margin-left: 4px;
+      }
+      .thing.link .tagline time, .thing.link .tagline .author, .thing.link .tagline .subreddit {
+        margin: 0 4px;
+        white-space: nowrap;
+      }
+      .thing.link .tagline a.author, .thing.link .tagline a.subreddit {
+        color: var(--text-normal) !important;
+      }
+      .thing.link .expando-button {
+        filter: grayscale(100%) invert(90%);
+        margin: 8px 16px 0 0;
+      }
+      .thing.link .expando-button:hover {
+        filter: grayscale(100%);
+      }
+      .thing.link.promoted {
+        display: none !important;
+      }
+      .thing.link .usertext-body .md {
+        background: none;
+        border: 1px dotted var(--gray-a0);
+        font-size: 16px;
+      }
+      .thing.link .crosspost-preview {
+        background: var(--gray-1);
+        border: none;
+        max-width: max-content;
+      }
+
+      .thing.comment {
+        background-color: transparent;
+        width: max-content;
+      }
+      .thing.comment .entry {
+        padding-bottom: 6px;
+      }
+      .thing .entry .flat-list.buttons {
+        font-size: 12px;
+        margin: 5px 0 0 12px;
+        padding: 0;
+      }
+      .thing .entry .flat-list.buttons li a {
+        color: var(--text-dark) !important;
+        font-size: 12px;
+        padding: 6px 4px;
+      }
+      .thing .entry .flat-list.buttons li a:hover {
+        color: var(--text-dark-hover) !important;
+        text-decoration: none;
+      }
+      .thing .midcol {
+        flex: 0 0 56px;
+        margin: 4px 8px;
+      }
+      .thing.spam {
+        background: var(--dark-red);
+      }
+
+      /* --- Upvote/downvote --- */
+      .midcol .arrow:hover {
+        opacity: 0.8;
+      }
+      .midcol .arrow.upmod {
+        filter: brightness(0.6) contrast(350%);
+      }
+      .midcol .arrow.downmod {
+        filter: brightness(0.7) contrast(200%) hue-rotate(-35deg);
+      }
+      .midcol .score.likes {
+        filter: brightness(0.7) contrast(200%);
+      }
+      
+      /* --- Media Embeds on Redditmedia --- */
+      iframe#media-preview {
+        height: 100vh;
+        width: 100vw;
+      }
+    `);
+
+
+    // --- 1. SELECTORS & CONSTANTS ---
+    const sidebar = document.querySelector('div.side');
+    const content = document.querySelector('div.content');
+    const SIDEBAR_WIDTH = '310px'; // The full width of the expanded sidebar
+    const HANDLE_WIDTH = '30px'; // The width of the visible handle when retracted
+
+    // If the essential elements don't exist, stop the script.
+    if (!sidebar || !content) {
+        console.log('RES for Old Reddit: Sidebar or content not found. Exiting.');
+        return;
+    }
+
+    // --- 2. SIDEBAR STYLES ---
+    GM_addStyle(`
+        /* --- Main Layout Adjustments --- */
+        body.res-sidebar-active .content {
+            /* Smooth transition for the margin change */
+            transition: margin-right 0.35s ease-in-out;
+        }
+
+        body.res-sidebar-active .side {
+            /* Position the sidebar fixed to the viewport */
+            position: fixed !important;
+            top: 0;
+            right: 0;
+            width: ${SIDEBAR_WIDTH};
+            height: 100vh;
+            z-index: 999;
+            /* Smooth transition for the movement */
+            transition: transform 0.35s ease-in-out;
+            /* Add a shadow for better visual separation */
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+            /* Ensure the sidebar starts retracted */
+            transform: translateX(calc(100% - ${HANDLE_WIDTH}));
+            display: flex !important; /* Use flex to position the handle and content wrapper */
+            padding: 0 !important; /* Override default padding */
+            margin: 0 !important;
+        }
+
+        /* --- Locked (Expanded) State --- */
+        /* When the body has the 'locked' class, force the sidebar to be visible */
+        body.res-sidebar-locked .side {
+            transform: translateX(0) !important;
+        }
+
+        /* --- Sidebar Handle ("The Lip") --- */
+        .res-sidebar-handle {
+            width: ${HANDLE_WIDTH};
+            height: 100%;
+            background-color: #333333; /* Dark gray color for the grip */
+            box-shadow: inset -2px 0 5px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0; /* Prevent the handle from shrinking */
+            position: relative;
+        }
+
+        /* --- Handle Icon --- */
+        .res-sidebar-handle svg {
+            color: white;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Rotate the chevron when the sidebar is locked/expanded */
+        body.res-sidebar-locked .res-sidebar-handle svg {
+            transform: rotate(180deg);
+        }
+
+        /* --- Content Wrapper --- */
+        .res-content-wrapper {
+            flex-grow: 1; /* Allows the wrapper to fill the remaining space */
+            width: 0; /* Required for flex-grow to work properly */
+            height: 100%;
+            overflow-y: auto; /* Allow only the content to scroll */
+            background-color: var(--gray-1); /* Match the dark theme's sidebar background */
+            padding: 16px; /* Restore some padding inside the content */
+        }
+    `);
+
+    // --- 3. DYNAMIC ELEMENT CREATION ---
+
+    // SVG icon for the handle
+    const chevronIconSVG = `<svg class="res-chevron-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>`;
+
+    // Create the handle element
+    const handle = document.createElement('div');
+    handle.className = 'res-sidebar-handle';
+    handle.innerHTML = chevronIconSVG;
+    
+    // Create a wrapper for the original sidebar content to preserve it
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'res-content-wrapper';
+    
+    // Move all of the sidebar's original children into the new wrapper
+    while (sidebar.firstChild) {
+        contentWrapper.appendChild(sidebar.firstChild);
+    }
+    
+    // Add the new wrapper and the handle to the sidebar
+    sidebar.appendChild(contentWrapper);
+    sidebar.prepend(handle);
+
+
+    // --- 4. CORE LOGIC ---
+
+    /**
+     * Reads the lock state from storage and applies the necessary
+     * classes and styles to the body and content elements.
+     */
+    function applySidebarState() {
+        const isLocked = GM_getValue('res_sidebar_locked', false);
+
+        // Toggle the class on the body to activate/deactivate locked styles
+        document.body.classList.toggle('res-sidebar-locked', isLocked);
+
+        // Adjust the main content margin based on the locked state
+        if (isLocked) {
+            // When locked, push the content to the left to make space for the full sidebar
+            content.style.marginRight = SIDEBAR_WIDTH;
+        } else {
+            // When unlocked, the content only needs to leave space for the handle
+            content.style.marginRight = HANDLE_WIDTH;
+        }
+    }
+
+    // --- 5. EVENT LISTENERS ---
+
+    handle.addEventListener('click', (e) => {
+        // Stop the click from propagating to other elements
+        e.stopPropagation();
+        e.preventDefault();
+
+        // Get the current state, invert it, and save it back to storage
+        const currentState = GM_getValue('res_sidebar_locked', false);
+        GM_setValue('res_sidebar_locked', !currentState);
+
+        // Re-apply the styles based on the new state
+        applySidebarState();
+    });
+
+
+    // --- 6. INITIALIZATION ---
+
+    // Add the master class to the body to enable all our styles
+    document.body.classList.add('res-sidebar-active');
+
+    // Set the initial state of the sidebar when the script loads
+    applySidebarState();
+
+})();
