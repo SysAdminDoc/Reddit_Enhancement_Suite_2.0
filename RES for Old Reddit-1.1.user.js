@@ -1,17 +1,17 @@
 // ==UserScript==
 // @name         RES for Old Reddit
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0
 // @version      1.5
 // @description  A retractable sidebar and a dark theme for Old Reddit, with settings.
-// @author       You & Gemini
+// @author       Matthew Parker
 // @match        https://old.reddit.com/*
 // @resource     DARK_THEME https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/raw/refs/heads/main/themes/darkmode.css
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_getResourceText
-// @downloadURL  https://update.greasyfork.org/scripts/xxxx/RES-for-Old-Reddit.user.js
-// @updateURL    https://update.greasyfork.org/scripts/xxxx/RES-for-Old-Reddit.meta.js
+// @downloadURL  https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/raw/refs/heads/main/RES%20for%20Old%20Reddit-1.1.user.js
+// @updateURL    https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/raw/refs/heads/main/RES%20for%20Old%20Reddit-1.1.user.js
 // ==/UserScript==
 
 (function() {
