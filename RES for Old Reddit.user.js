@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         RES for Old Reddit
 // @namespace    https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0
-// @version      2.7
-// @description  A retractable sidebar, multiple themes, and other enhancements for Old Reddit.
+// @version      2.8
+// @description  Automatically redirects to Old Reddit, plus a retractable sidebar, themes, and other enhancements.
 // @author       Matthew Parker
 // @match        https://old.reddit.com/*
+// @match        https://www.reddit.com/*
+// @exclude      *://www.reddit.com/poll/*
 // @icon         https://b.thumbs.redditmedia.com/JeP1WF0kEiiH1gT8vOr_7kFAwIlHzRBHjLDZIkQP61Q.jpg
 // @resource     DARK_THEME https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/raw/refs/heads/main/themes/darkmode.css
 // @resource     CATPPUCCIN_THEME https://raw.githubusercontent.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/refs/heads/main/themes/catppuccin-mocha.css
@@ -13,12 +15,31 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_getResourceText
+// @run-at       document-start
 // @downloadURL  https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/raw/refs/heads/main/RES%20for%20Old%20Reddit.user.js
 // @updateURL    https://github.com/SysAdminDoc/Reddit_Enhancement_Suite_2.0/raw/refs/heads/main/RES%20for%20Old%20Reddit.user.js
 // ==/UserScript==
 
 (function() {
     'use strict';
+
+    // --- NEW FEATURE: BRING BACK OLD REDDIT ---
+    // This function checks if the user is on new Reddit and redirects them to old.reddit.com if the setting is enabled.
+    // It runs at document-start to prevent the new Reddit interface from loading.
+    function bringBackOldReddit() {
+        // The setting is enabled by default.
+        const isEnabled = GM_getValue('res_force_old_reddit_enabled', true);
+        if (isEnabled && window.location.hostname === 'www.reddit.com') {
+            window.location.replace("https://old.reddit.com" + window.location.pathname + window.location.search);
+            return true; // Indicate that a redirect is happening
+        }
+        return false; // Indicate no redirect
+    }
+
+    // Execute the redirect immediately. If it happens, stop the rest of the script.
+    if (bringBackOldReddit()) {
+        return;
+    }
 
     // --- 1. CONFIGURATION & CONSTANTS ---
     const OLD_FAVICON_URL = 'https://b.thumbs.redditmedia.com/JeP1WF0kEiiH1gT8vOr_7kFAwIlHzRBHjLDZIkQP61Q.jpg';
@@ -117,6 +138,7 @@
     }
 
     function createSettingsPanel() {
+        // This function can only run on a page with the correct DOM, so it will only run on old.reddit.com
         const headerRight = document.getElementById('header-bottom-right');
         if (headerRight) {
             const settingsCog = document.createElement('a');
@@ -134,7 +156,16 @@
                     <span id="res-modal-close" class="res-modal-close">&times;</span>
                     <div class="res-modal-header">RES for Old Reddit Settings</div>
 
-                     <div class="res-setting-group" data-group-id="appearance">
+                    <div class="res-setting-group" data-group-id="general">
+                        <div class="res-group-header"><h3>General</h3><span class="res-chevron">▸</span></div>
+                        <div class="res-group-content">
+                             <div class="res-setting-row">
+                                <label for="res-setting-force-old-reddit">Always Use Old Reddit<br><small>Redirects www.reddit.com to old.reddit.com</small></label>
+                                <div class="res-control"><input type="checkbox" id="res-setting-force-old-reddit"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="res-setting-group" data-group-id="appearance">
                         <div class="res-group-header"><h3>Appearance</h3><span class="res-chevron">▸</span></div>
                         <div class="res-group-content">
                              <div class="res-setting-row">
@@ -162,9 +193,7 @@
                             <div class="res-setting-row"> <label>Sidebar Position</label> <div class="res-control res-radio-group"> <input type="radio" id="res-sidebar-pos-left" name="sidebar_pos" value="left"><label for="res-sidebar-pos-left">Left</label> <input type="radio" id="res-sidebar-pos-right" name="sidebar_pos" value="right"><label for="res-sidebar-pos-right">Right</label> </div> </div>
                             <div class="res-setting-row"> <label for="res-setting-sidebar-width">Sidebar Width</label> <div class="res-control"> <input type="range" id="res-setting-sidebar-width" min="250" max="500" step="5"> <span class="res-range-value" id="res-sidebar-width-value"></span> </div> </div>
                             <div class="res-setting-row"> <label for="res-setting-handle-width">Handle Width</label> <div class="res-control"> <input type="range" id="res-setting-handle-width" min="15" max="50" step="1"> <span class="res-range-value" id="res-handle-width-value"></span> </div> </div>
-                            <!-- MODIFICATION START: New Sidebar Setting -->
                             <div class="res-setting-row"> <label for="res-setting-swap-sidebar">Swap with Multireddit Panel<br><small>(when sidebar is on left)</small></label> <div class="res-control"><input type="checkbox" id="res-setting-swap-sidebar"></div> </div>
-                            <!-- MODIFICATION END -->
                         </div>
                     </div>
 
@@ -222,6 +251,9 @@
         });
 
         const checkboxes = {
+            /* MODIFICATION START: New checkbox for redirect */
+            'res-setting-force-old-reddit': 'res_force_old_reddit_enabled',
+            /* MODIFICATION END */
             'res-setting-sidebar': 'res_sidebar_enabled', 'res-setting-sidebar-float': 'res_sidebar_float',
             'res-setting-no-css': 'res_no_css_enabled',
             'res-setting-hide-comments': 'res_hide_comments_enabled', 'res-setting-hide-deleted': 'res_hide_deleted_enabled',
@@ -229,14 +261,13 @@
             'res-setting-hide-premium': 'res_hide_premium_banner',
             'res-setting-hide-new-reddit': 'res_hide_get_new_reddit_btn',
             'res-setting-hide-multireddit': 'res_hide_multireddit_panel',
-            /* MODIFICATION START: New checkbox */
             'res-setting-swap-sidebar': 'res_swap_sidebar_enabled'
-            /* MODIFICATION END */
         };
         for (const id in checkboxes) {
             document.getElementById(id).addEventListener('change', (e) => {
                 GM_setValue(checkboxes[id], e.target.checked);
-                if (id === 'res-setting-no-css') {
+                if (id === 'res-setting-no-css' || id === 'res-setting-force-old-reddit') {
+                    // Changing redirect or CSS requires a reload to see changes
                     sessionStorage.setItem('res-settings-open', 'true');
                     window.location.reload();
                 } else {
@@ -532,7 +563,6 @@
         }
     }
 
-    /* MODIFICATION START: New function to manage multireddit panel mods */
     function applyMultiredditMods() {
         const styleId = 'res-multireddit-swap-style';
         let styleTag = document.getElementById(styleId);
@@ -582,7 +612,6 @@
             }
         }
     }
-    /* MODIFICATION END */
 
 
     // --- 4. DYNAMIC & MAIN SETTINGS ORCHESTRATOR ---
@@ -628,6 +657,7 @@
 
     function applySettings() {
         // Load settings into modal
+        document.getElementById('res-setting-force-old-reddit').checked = GM_getValue('res_force_old_reddit_enabled', true);
         document.getElementById('res-setting-sidebar').checked = GM_getValue('res_sidebar_enabled', true);
         document.getElementById('res-setting-sidebar-float').checked = GM_getValue('res_sidebar_float', false);
         document.getElementById('res-setting-theme').value = GM_getValue('res_theme', 'none');
@@ -641,9 +671,7 @@
         document.getElementById('res-setting-hide-premium').checked = GM_getValue('res_hide_premium_banner', false);
         document.getElementById('res-setting-hide-new-reddit').checked = GM_getValue('res_hide_get_new_reddit_btn', false);
         document.getElementById('res-setting-hide-multireddit').checked = GM_getValue('res_hide_multireddit_panel', false);
-        /* MODIFICATION START: Load new checkbox value */
         document.getElementById('res-setting-swap-sidebar').checked = GM_getValue('res_swap_sidebar_enabled', false);
-        /* MODIFICATION END */
 
         const sliders = {
             'res-setting-sidebar-width': { key: 'res_sidebar_width', valueId: 'res-sidebar-width-value', units: 'px', default: 310 },
@@ -685,13 +713,13 @@
         toggleElementVisibility(GM_getValue('res_hide_get_new_reddit_btn', false), 'res-hide-new-reddit-style', '#redesign-beta-optin-btn');
         toggleElementVisibility(GM_getValue('res_hide_multireddit_panel', false), 'res-hide-multireddit-style', '.listing-chooser.initialized');
 
-        /* MODIFICATION START: Call new function */
         applyMultiredditMods();
-        /* MODIFICATION END */
     }
 
     // --- 5. INITIALIZATION ---
     function init() {
+        // This function runs only after the redirect check has passed.
+        // It's safe to assume we are on old.reddit.com here.
         injectBaseStyles();
         createSettingsPanel();
         applySettings();
@@ -707,5 +735,10 @@
         }
     }
 
-    init();
+    // The script waits until the DOM is interactive to initialize the UI elements.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();
